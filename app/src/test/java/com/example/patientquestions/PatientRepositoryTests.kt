@@ -1,8 +1,8 @@
 package com.example.patientquestions
 
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -11,14 +11,25 @@ import org.junit.Test
 class PatientRepositoryTests {
     private val mockkDatabase = mockk<PatientDatabaseWrapper>(relaxed = true)
     private val mockkJsonParser = mockk<JsonParser>(relaxed = true)
-    private val sut = PatientRepository(mockkDatabase, mockkJsonParser)
+    private val mockkQuestionHelper = mockk<QuestionHelper>(relaxed = true)
+    private val mockkQuestionDataHelper = mockk<QuestionDataHelper>(relaxed = true)
+    private val mockJsonConversionHelper = mockk<JsonConversionHelper>(relaxed = true)
+    private val sut = PatientRepository(mockkDatabase, mockkJsonParser, mockJsonConversionHelper, mockkQuestionHelper, mockkQuestionDataHelper)
+
+    private val appointmentExternalId = "be142dc6-93bd-11eb-a8b3-0242ac130003"
+
     @Test
     fun `getQuestion 0`() {
-        val questionText = "Hi John, on a scale of 1-10, would you recommend Dr Care to a friend or family member? 1 = Would not recommend, 10 = Would strongly recommend"
+        val questionText = "Hello Android"
+        val answers = listOf("1", "2")
+        coEvery { mockkQuestionHelper.getQuestionText(0) } returns questionText
+        coEvery { mockkQuestionHelper.getAnswers(0) } returns answers
+
+        coEvery { mockkQuestionDataHelper.fillInData(questionText, appointmentExternalId) } returns questionText
         runBlocking {
             val question = sut.getQuestion(0)
             assertEquals(questionText, question.text)
-            assertEquals(10, question.answers.size)
+            assertEquals(answers, question.answers)
         }
     }
 
@@ -56,5 +67,27 @@ class PatientRepositoryTests {
             sut.saveDiagnosis(diagnosisEntity)
             coVerify { mockkDatabase.getPatientDao().saveDiagnosis(diagnosisEntity) }
         }
+    }
+
+    @Test
+    fun `test getSummary`() {
+        runBlocking {
+            val questions = listOf("1", "2")
+            val filledInQuestions = listOf("1a", "2b")
+            val answers = arrayOf("Yes", "No")
+            val summaryText = "Thanks again! Here’s what we heard:"
+            coEvery { mockkQuestionHelper.getQuestions() } returns questions
+            coEvery { mockkQuestionDataHelper.fillInData("1", appointmentExternalId) } returns filledInQuestions[0]
+            coEvery { mockkQuestionDataHelper.fillInData("2", appointmentExternalId) } returns filledInQuestions[1]
+            sut.saveAnswer(0, answers[0])
+            sut.saveAnswer(1, answers[1])
+            val summary = sut.getSummary()
+            assertEquals(summaryText, summary.summaryText)
+            assertEquals(filledInQuestions[0], summary.questions[0])
+            assertEquals(filledInQuestions[1], summary.questions[1])
+            assertEquals(answers[0], summary.answers[0])
+            assertEquals(answers[1], summary.answers[1])
+        }
+
     }
 }

@@ -19,10 +19,6 @@ class MainViewModel
     private val _eventChannel = ViewModelChannel<Event>(this)
     val eventChannel: ReceiveChannel<Event> = _eventChannel
 
-    init {
-
-    }
-
     suspend fun loadData(baseContext: Context) {
         patientRepository.init(baseContext)
     }
@@ -32,12 +28,23 @@ class MainViewModel
         return patientRepository.getQuestion(questionNumber)
     }
 
+    suspend fun getSummary(): Summary {
+        return patientRepository.getSummary()
+    }
+
     fun recordAnswer(answer: String) {
         patientRepository.saveAnswer(questionNumber, answer)
+        questionNumber++
+        if (questionNumber >= patientRepository.nQuestions) {
+            _eventChannel.sendAsync(Event.ShowSummary)
+        } else {
+            _eventChannel.sendAsync(Event.NextQuestion)
+        }
     }
 
     sealed class Event {
         object NextQuestion: Event()
+        object ShowSummary: Event()
     }
 }
 

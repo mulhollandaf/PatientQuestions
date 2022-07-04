@@ -1,6 +1,10 @@
 package com.example.patientquestions
 
-class JsonConversionHelper(private val patientDao: PatientDao) {
+import javax.inject.Inject
+
+class JsonConversionHelper
+    @Inject constructor(databaseWrapper: PatientDatabaseWrapper) {
+    private val patientDao = databaseWrapper.getPatientDao()
     fun convertToPatient(resourceJson: ResourceJson): PatientEntity {
         return PatientEntity(
             externalId = resourceJson.id,

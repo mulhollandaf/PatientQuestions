@@ -8,14 +8,14 @@ import org.junit.Before
 import org.junit.Test
 
 class QuestionDataHelperTests {
-    private val mockkPatientDao = mockk<PatientDao>()
-    private val sut = QuestionDataHelper(mockkPatientDao)
+    private val mockPatientDatabaseWrapper = mockk<PatientDatabaseWrapper>(relaxed = true)
+    private val sut = QuestionDataHelper(mockPatientDatabaseWrapper)
     private val appointmentExternalId = "be142dc6-93bd-11eb-a8b3-0242ac130003"
 
     @Before
     fun setup() {
         coEvery {
-            mockkPatientDao.getAppointmentByExternalId(appointmentExternalId)
+            mockPatientDatabaseWrapper.getPatientDao().getAppointmentByExternalId(appointmentExternalId)
         } returns AppointmentEntity(
             1,
             appointmentExternalId,
@@ -25,7 +25,7 @@ class QuestionDataHelperTests {
         )
 
         coEvery {
-            mockkPatientDao.getPatientById(1)
+            mockPatientDatabaseWrapper.getPatientDao().getPatientById(1)
         } returns PatientEntity(
             1,
             "",
@@ -35,7 +35,7 @@ class QuestionDataHelperTests {
         )
 
         coEvery {
-            mockkPatientDao.getDoctorById(1)
+            mockPatientDatabaseWrapper.getPatientDao().getDoctorById(1)
         } returns DoctorEntity(
             1,
             "",
@@ -44,7 +44,7 @@ class QuestionDataHelperTests {
         )
 
         coEvery {
-            mockkPatientDao.getDiagnosisByAppointmentId(1)
+            mockPatientDatabaseWrapper.getPatientDao().getDiagnosisByAppointmentId(1)
         } returns DiagnosisEntity(
             1,
             "",

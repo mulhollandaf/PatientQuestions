@@ -7,8 +7,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class JsonConversionHelperTests {
-    private val mockkPatientDao = mockk<PatientDao>()
-    private val sut = JsonConversionHelper(mockkPatientDao)
+    private val mockPatientDatabaseWrapper = mockk<PatientDatabaseWrapper>(relaxed = true)
+    private val sut = JsonConversionHelper(mockPatientDatabaseWrapper)
     @Test
     fun `convert patient`() {
         val nameJson = NameJson(
@@ -140,8 +140,8 @@ class JsonConversionHelperTests {
             actor = actorJson
         )
 
-        coEvery { mockkPatientDao.getPatientIdByExternalId("1") } returns 1L
-        coEvery { mockkPatientDao.getDoctorIdByExternalId("2") } returns 2L
+        coEvery { mockPatientDatabaseWrapper.getPatientDao().getPatientIdByExternalId("1") } returns 1L
+        coEvery { mockPatientDatabaseWrapper.getPatientDao().getDoctorIdByExternalId("2") } returns 2L
 
 
         runBlocking {
@@ -162,8 +162,8 @@ class JsonConversionHelperTests {
             reference = "Doctor/2"
         )
 
-        coEvery { mockkPatientDao.getPatientIdByExternalId("1") } returns 1L
-        coEvery { mockkPatientDao.getDoctorIdByExternalId("2") } returns 2L
+        coEvery { mockPatientDatabaseWrapper.getPatientDao().getPatientIdByExternalId("1") } returns 1L
+        coEvery { mockPatientDatabaseWrapper.getPatientDao().getDoctorIdByExternalId("2") } returns 2L
 
         val appointmentJson = ResourceJson(
             resourceType = "Appointment",
@@ -198,7 +198,7 @@ class JsonConversionHelperTests {
             appointment = appointmentJson,
         )
 
-        coEvery { mockkPatientDao.getAppointmentIdByExternalId("1") } returns 1L
+        coEvery { mockPatientDatabaseWrapper.getPatientDao().getAppointmentIdByExternalId("1") } returns 1L
 
         runBlocking {
             val diagnosisEntity = sut.convertToDiagnosis(diagnosisJson)

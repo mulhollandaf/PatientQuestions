@@ -1,6 +1,10 @@
 package com.example.patientquestions
 
-class QuestionDataHelper(private val patientDao: PatientDao) {
+import javax.inject.Inject
+
+class QuestionDataHelper
+    @Inject constructor(databaseWrapper: PatientDatabaseWrapper) {
+    private val patientDao = databaseWrapper.getPatientDao()
     suspend fun fillInData(text: String, appointmentId: String): String {
         val appointmentEntity = patientDao.getAppointmentByExternalId(appointmentId)
         val patientEntity = patientDao.getPatientById(appointmentEntity.patientId)
