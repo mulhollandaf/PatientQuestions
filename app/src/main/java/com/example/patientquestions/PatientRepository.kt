@@ -24,6 +24,11 @@ class PatientRepository
 
     private val answers = Array(nQuestions) { "" }
 
+    suspend fun init(context: Context) {
+        val parsedData = jsonParser.loadJson(context)
+        convertAndAddToDatabase(parsedData)
+    }
+
     suspend fun getQuestion(questionNumber: Int): Question {
         val questionText = questionHelper.getQuestionText(questionNumber)
         val questionFilledText = questionDataHelper.fillInData(questionText, appointmentExternalId)
@@ -33,11 +38,6 @@ class PatientRepository
 
     fun saveAnswer(questionNumber: Int, answer: String) {
         answers[questionNumber] = answer
-    }
-
-    suspend fun init(context: Context) {
-        val parsedData = jsonParser.loadJson(context)
-        convertAndAddToDatabase(parsedData)
     }
 
     private suspend fun convertAndAddToDatabase(parsedJson: ResourceBundleJson) {

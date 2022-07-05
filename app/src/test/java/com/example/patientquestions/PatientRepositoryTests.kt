@@ -13,8 +13,8 @@ class PatientRepositoryTests {
     private val mockkJsonParser = mockk<JsonParser>(relaxed = true)
     private val mockkQuestionHelper = mockk<QuestionHelper>(relaxed = true)
     private val mockkQuestionDataHelper = mockk<QuestionDataHelper>(relaxed = true)
-    private val mockJsonConversionHelper = mockk<JsonConversionHelper>(relaxed = true)
-    private val sut = PatientRepository(mockkDatabase, mockkJsonParser, mockJsonConversionHelper, mockkQuestionHelper, mockkQuestionDataHelper)
+    private val mockkJsonConversionHelper = mockk<JsonConversionHelper>(relaxed = true)
+    private val sut = PatientRepository(mockkDatabase, mockkJsonParser, mockkJsonConversionHelper, mockkQuestionHelper, mockkQuestionDataHelper)
 
     private val appointmentExternalId = "be142dc6-93bd-11eb-a8b3-0242ac130003"
 

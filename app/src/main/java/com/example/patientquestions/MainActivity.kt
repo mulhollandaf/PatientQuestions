@@ -6,8 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -24,6 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -35,7 +40,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             viewModel.loadData(baseContext)
             val question = viewModel.getQuestion()
-            loadContent(question)
+            displayQuestion(question)
         }
         lifecycleScope.launch {
             for (event in viewModel.eventChannel) {
@@ -69,11 +74,11 @@ class MainActivity : ComponentActivity() {
     private fun loadSummary() {
         lifecycleScope.launch {
             val summary = viewModel.getSummary()
-            loadContentSummary(summary)
+            displaySummary(summary)
         }
     }
 
-    private fun loadContentSummary(summary: Summary) {
+    private fun displaySummary(summary: Summary) {
         setContent {
             PatientQuestionsTheme {
                 // A surface container using the 'background' color from the theme
@@ -90,11 +95,11 @@ class MainActivity : ComponentActivity() {
     private fun loadNextQuestion() {
         lifecycleScope.launch {
             val question = viewModel.getQuestion()
-            loadContent(question)
+            displayQuestion(question)
         }
     }
 
-    private fun loadContent(question: Question) {
+    private fun displayQuestion(question: Question) {
         setContent {
             PatientQuestionsTheme {
                 // A surface container using the 'background' color from the theme
@@ -113,15 +118,15 @@ class MainActivity : ComponentActivity() {
         Column() {
             Text(text = summary.summaryText)
             summary.questions.forEachIndexed { index, question ->
-                DisplayQuestionAnswer(question, summary.answers[index])
+                DisplaySummaryQuestionAnswer(question, summary.answers[index])
             }
         }
 
     }
 
     @Composable
-    fun DisplayQuestionAnswer(question: String, answer: String) {
-        Text("$question - $answer")
+    fun DisplaySummaryQuestionAnswer(question: String, answer: String) {
+        Text("$question - $answer", modifier = Modifier.padding(16.dp))
     }
 
     @Composable
@@ -151,7 +156,10 @@ class MainActivity : ComponentActivity() {
                 },
                 label = { Text("Answer") }
             )
-            TextButton(onClick = {viewModel.recordAnswer(text)} ) {
+            val shape = CircleShape
+            TextButton(onClick = {viewModel.recordAnswer(text)},
+                Modifier.fillMaxWidth()
+                    .border(2.dp, MaterialTheme.colors.secondary, shape)) {
                 Text(
                     text = "Submit"
                 )
@@ -162,7 +170,11 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun DisplayAnswer(answer: String) {
-        TextButton(onClick = {viewModel.recordAnswer(answer)} ) {
+        val shape = CircleShape
+        TextButton(onClick = {viewModel.recordAnswer(answer)},
+            Modifier.fillMaxWidth()
+                .border(2.dp, MaterialTheme.colors.secondary, shape)
+        ) {
             Text(
                 text = answer
             )
